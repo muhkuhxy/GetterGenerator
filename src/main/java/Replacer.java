@@ -19,13 +19,13 @@ public class Replacer {
          final File file = new File(fileName);
          final List<String> lines = Files.readLines(file, Charsets.UTF_8);
          int from = -1, to = -1;
-         for(int i = lines.size()-1; i >= 0; i--) {
+         for(int i = lines.size() - 1; i >= 0; i--) {
             if(lines.get(i).contains(placeholder)) {
-               if(to==-1) {
+               if(to == -1) {
                   to = i;
                   continue;
                } else if(from == -1) {
-                  from = i+1;
+                  from = i + 1;
                   break;
                }
             }
@@ -33,14 +33,18 @@ public class Replacer {
                lines.remove(i);
             }
          }
-         if(from == -1 || to == -1) {
-            throw new IllegalStateException("mark area in file with "+placeholder+" on different lines");
+         if(from == -1 && to == -1) {
+            // no marker -> nothing to do
+            return;
          }
-         lines.add(from,getters);
+         if(from == -1 || to == -1) {
+            throw new IllegalStateException(fileName
+                  + " contains only one marker. Hint: place markers on consecutive lines initially.");
+         }
+         lines.add(from, getters);
          Files.write(Joiner.on("\n").join(lines), file, Charsets.UTF_8);
-      } catch (final IOException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
+      } catch(final IOException e) {
+         throw new IllegalArgumentException("error replacing in file", e);
       }
    }
 

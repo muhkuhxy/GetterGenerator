@@ -1,9 +1,9 @@
-import java.io.File;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
-
-import com.google.common.base.Charsets;
-import com.google.common.io.Files;
 
 public class TemplateProvider {
 
@@ -16,17 +16,27 @@ public class TemplateProvider {
                readTemplateFromResource("optional-getter.java.snippet");
          requiredTemplate =
                readTemplateFromResource("required-getter.java.snippet");
-      } catch (final IOException e) {
+      } catch(final IOException e) {
          throw new IllegalStateException("resource file not readable", e);
       }
    }
 
    private String readTemplateFromResource(final String resourceName)
          throws IOException {
-      return Files
-            .readLines(new File(getClass().getClassLoader()
-                  .getResource(resourceName).getFile()), Charsets.UTF_8)
-            .stream().collect(Collectors.joining("\n"));
+      final List<String> lines = readResource(resourceName);
+      return lines.stream().collect(Collectors.joining("\n"));
+   }
+
+   private List<String> readResource(final String resourceName)
+         throws IOException {
+      final BufferedReader reader = new BufferedReader(new InputStreamReader(
+            getClass().getClassLoader().getResourceAsStream(resourceName)));
+      final List<String> lines = new ArrayList<>();
+      String line;
+      while((line = reader.readLine()) != null) {
+         lines.add(line);
+      }
+      return lines;
    }
 
    public String getTemplate(final boolean optional) {

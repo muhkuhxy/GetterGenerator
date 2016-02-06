@@ -12,16 +12,18 @@ import java.util.stream.Collectors;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.springframework.util.AntPathMatcher;
 
-@Mojo(name = "generateGetters")
+@Mojo(name = "generateGetters", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
 public class GeneratorMojo extends AbstractMojo {
 
    @Parameter(required = true,
          defaultValue = "${project.build.sourceDirectory}")
-   private File sourceDirectory;
+   private File directory;
    @Parameter(defaultValue = "\n\n")
    private String delimiter;
    @Parameter(defaultValue = "")
@@ -36,41 +38,51 @@ public class GeneratorMojo extends AbstractMojo {
 
    @Override
    public void execute() throws MojoExecutionException, MojoFailureException {
-      getLog().info("generating getters");
       replacer = new Replacer(placeholder);
-      maker = new GetterMaker(suffix);
-      if (includes == null) {
+      maker = new GetterMaker(suffix == null ? "" : suffix);
+      final Log log = getLog();
+      log.info("generating getters");
+      if(includes == null) {
          includes = new ArrayList<>();
       }
-      if (includes.isEmpty()) {
+      if(includes.isEmpty()) {
          includes.add("**/*.java");
       }
+      log.debug(includes.toString());
+      log.debug(directory.toString());
+      final List<String> files = getFiles(log);
+      files.forEach(this::analyzeFileAndReplaceOrPrintGetters);
+   }
+
+   private List<String> getFiles(final Log log) {
       final List<String> files = new ArrayList<>();
       try {
-         Files.walkFileTree(sourceDirectory.toPath(),
-               new SimpleFileVisitor<Path>() {
-                  private final AntPathMatcher matcher = new AntPathMatcher();
 
-                  @Override
-                  public FileVisitResult visitFile(final Path file,
-                        final BasicFileAttributes attrs) throws IOException {
-                     final String path = file.toString();
-                     if (includes.stream().anyMatch(pattern -> {
-                        return matcher.match(pattern, path);
-                     })) {
-                        files.add(path);
-                     }
-                     return super.visitFile(file, attrs);
-                  }
-               });
-      } catch (final IOException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
+         final Path directoryAsPath = directory.toPath();
+         Files.walkFileTree(directoryAsPath, new SimpleFileVisitor<Path>() {
+            private final AntPathMatcher matcher = new AntPathMatcher();
+
+            @Override
+            public FileVisitResult visitFile(final Path file,
+                  final BasicFileAttributes attrs) throws IOException {
+               final String relativePath =
+                     directoryAsPath.relativize(file).toString();
+               log.debug("matching " + relativePath);
+               if(includes.stream().anyMatch(pattern -> {
+                  return matcher.match(pattern, relativePath);
+               })) {
+                  log.debug("adding " + relativePath);
+                  files.add(file.toString());
+               }
+               return super.visitFile(file, attrs);
+            }
+         });
+      } catch(final IOException e) {
+         throw new RuntimeException(e);
       }
 
-      getLog().info(files.size() + " files found: " + files);
-
-      files.forEach(this::analyzeFileAndReplaceOrPrintGetters);
+      log.info("will process " + files.size() + " files");
+      return files;
    }
 
    private void analyzeFileAndReplaceOrPrintGetters(final String file) {
@@ -80,6 +92,7 @@ public class GeneratorMojo extends AbstractMojo {
    }
 
    private List<String> getters(final String file) {
+      getLog().info("processing " + file);
       final List<GetterSpec> specs = new GetterAnalyzer(file).analyze();
       return specs.stream().map(maker::make).collect(Collectors.toList());
    }

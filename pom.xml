@@ -36,7 +36,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
      <dependency>
         <groupId>org.antlr</groupId>
         <artifactId>antlr4-runtime</artifactId>
-        <version>4.5.2</version>
+        <version>4.3</version>
      </dependency>
 
      <dependency>
@@ -54,23 +54,48 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
   </dependencies>
 
   <build>
-    <plugins>
+     <plugins>
+        <plugin>
+           <groupId>org.apache.maven.plugins</groupId>
+           <artifactId>maven-plugin-plugin</artifactId>
+           <version>3.3</version>
+           <configuration>
+              <goalPrefix>getter-generator</goalPrefix>
+              <skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
+           </configuration>
+           <executions>
+              <execution>
+                 <id>default-descriptor</id>
+                 <goals>
+                    <goal>descriptor</goal>
+                 </goals>
+                 <phase>process-classes</phase>
+              </execution>
+              <execution>
+                 <id>help-descriptor</id>
+                 <goals>
+                    <goal>helpmojo</goal>
+                 </goals>
+                 <phase>process-classes</phase>
+              </execution>
+           </executions>
+        </plugin>
 
-      <plugin>
-        <groupId>org.antlr</groupId>
-        <artifactId>antlr4-maven-plugin</artifactId>
-        <version>4.5.2</version>
-        <executions>
-          <execution>
-            <id>antlr</id>
-            <goals>
-              <goal>antlr4</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
+        <plugin>
+           <groupId>org.antlr</groupId>
+           <artifactId>antlr4-maven-plugin</artifactId>
+           <version>4.5.2</version>
+           <executions>
+              <execution>
+                 <id>antlr</id>
+                 <goals>
+                    <goal>antlr4</goal>
+                 </goals>
+              </execution>
+           </executions>
+        </plugin>
 
-    </plugins>
+     </plugins>
   </build>
 
 </project>

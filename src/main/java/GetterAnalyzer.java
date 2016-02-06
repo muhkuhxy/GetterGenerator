@@ -22,7 +22,6 @@ public class GetterAnalyzer extends JavaBaseListener {
          final JavaLexer lexer = new JavaLexer(input);
          final CommonTokenStream tokens = new CommonTokenStream(lexer);
          parser = new JavaParser(tokens);
-         System.out.println();
       } catch (final IOException e) {
          throw new IllegalArgumentException("file not found", e);
       }
