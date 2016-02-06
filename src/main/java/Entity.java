@@ -1,19 +1,19 @@
 import java.util.List;
 
 public class Entity {
-	@Nullable
-	private String thing_;
+   @Nullable
+   private String thing_;
 
-	@Nullable
-	class Asad {
-		@Nullable
-		private Integer wtf;
-	}
+   @Nullable
+   class Asad {
+      @Nullable
+      private Integer wtf;
+   }
 
-	private Object x;
+   private Object x;
 
-	List< String > y, whatever;
+   List< String > y, whatever;
 
-	// GENERATE_GETTERS
+   // GENERATE_GETTERS
 
 }
