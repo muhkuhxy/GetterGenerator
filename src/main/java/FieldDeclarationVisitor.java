@@ -8,14 +8,15 @@ final class FieldDeclarationVisitor extends JavaBaseListener {
 
    @Override
    public void enterType(final JavaParser.TypeContext ctx) {
-      if(outerMostType) {
+      if (outerMostType) {
          type = ctx.getText();
          outerMostType = false;
       }
    }
 
    @Override
-   public void enterVariableDeclaratorId(final JavaParser.VariableDeclaratorIdContext ctx) {
+   public void enterVariableDeclaratorId(
+         final JavaParser.VariableDeclaratorIdContext ctx) {
       names.add(ctx.getText());
    }
 

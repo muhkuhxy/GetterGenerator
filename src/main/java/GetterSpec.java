@@ -22,7 +22,8 @@ public class GetterSpec {
       return className;
    }
 
-   public GetterSpec(final String type, final String field, final String className, final boolean optional) {
+   public GetterSpec(final String type, final String field,
+         final String className, final boolean optional) {
       this.type = type;
       this.field = field;
       this.className = className;
@@ -31,13 +32,8 @@ public class GetterSpec {
 
    @Override
    public String toString() {
-      return "GetterSpec [type=" + type + ", field=" + field + ", className=" + className + ", optional=" + optional
-            + "]";
-   }
-
-   public String toJson() {
-      return String.format("{\"className\":\"%s\",\"field\":\"%s\",\"type\":\"%s\",\"optional\":%s}", className, field,
-            type, optional);
+      return "GetterSpec [type=" + type + ", field=" + field + ", className="
+            + className + ", optional=" + optional + "]";
    }
 
 }

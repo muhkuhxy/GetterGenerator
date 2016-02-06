@@ -35,31 +35,40 @@ public class GetterAnalyzer extends JavaBaseListener {
    }
 
    @Override
-   public void enterClassDeclaration(final JavaParser.ClassDeclarationContext ctx) {
+   public void enterClassDeclaration(
+         final JavaParser.ClassDeclarationContext ctx) {
       final String className = ctx.getChild(1).getText();
       this.className.push(className);
    }
 
    @Override
-   public void enterClassBodyDeclaration(final JavaParser.ClassBodyDeclarationContext ctx) {
+   public void enterClassBodyDeclaration(
+         final JavaParser.ClassBodyDeclarationContext ctx) {
       final boolean optional = hasNullableAnnotation(parser, ctx.getPayload());
-      for (final ParseTree field : XPath.findAll(ctx.getPayload(), "*/memberDeclaration/fieldDeclaration", parser)) {
-         final FieldDeclarationVisitor fieldVisitor = new FieldDeclarationVisitor();
+      for (final ParseTree field : XPath.findAll(ctx.getPayload(),
+            "*/memberDeclaration/fieldDeclaration", parser)) {
+         final FieldDeclarationVisitor fieldVisitor =
+               new FieldDeclarationVisitor();
          ParseTreeWalker.DEFAULT.walk(fieldVisitor, field);
          fieldVisitor.getNames().forEach(n -> {
-            getters.add(new GetterSpec(fieldVisitor.getType(), n, className.peek(), optional));
+            getters.add(new GetterSpec(fieldVisitor.getType(), n,
+                  className.peek(), optional));
          });
       }
    }
 
    @Override
-   public void exitClassDeclaration(final JavaParser.ClassDeclarationContext ctx) {
+   public void exitClassDeclaration(
+         final JavaParser.ClassDeclarationContext ctx) {
       className.pop();
    }
 
-   private boolean hasNullableAnnotation(final JavaParser parser, final ParseTree declaration) {
-      final ParseTreePattern p = parser.compileParseTreePattern("@ Nullable", JavaParser.RULE_annotation);
-      final boolean nullable = !p.findAll(declaration, "*/modifier/classOrInterfaceModifier/annotation").isEmpty();
+   private boolean hasNullableAnnotation(final JavaParser parser,
+         final ParseTree declaration) {
+      final ParseTreePattern p = parser.compileParseTreePattern("@ Nullable",
+            JavaParser.RULE_annotation);
+      final boolean nullable = !p.findAll(declaration,
+            "*/modifier/classOrInterfaceModifier/annotation").isEmpty();
       return nullable;
    }
 }
